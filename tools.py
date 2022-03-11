@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from PIL import Image
 from scipy.optimize import curve_fit
 
 
@@ -100,3 +102,25 @@ def error_prop(f,args,errors,ind_var = [None],**kwargs):
         prop_arr.append(prop_err)
     
     return prop_arr
+
+
+
+def line_intensity(filename, rows = [], cols = []):
+    '''takes filename and the rows and cols of the image you wish to inspect and returns the line intensity
+    averaged across the columns'''
+    #get image and change to np.array
+    img = np.array(Image.open(filename))
+
+    #handle case where no rows or cols are specified
+    if len(cols) == 0:
+        cols = [0, len(img[0])]
+    
+    if len(rows) == 0:
+        rows = [0, len(img)]
+
+    
+    selected_rectangle = img[rows[0]:rows[1],cols[0]:cols[1]]
+
+    line_intensity = np.mean(selected_rectangle, axis = 0)
+    
+    return line_intensity
