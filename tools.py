@@ -170,11 +170,11 @@ def extract_data(filename, conversion, rows = [], cols = [],sigmaRaw = 0.0315, n
     profileMin = np.min(profile)
     rowsAveraged = rows[1] - rows[0]
     
-    _, index = local_max(profile, N = len(profile))
+    
 
     #get the position from center of sensor
     x  = np.arange(*cols, dtype = float)
-    x += conversion*rows[0] - np.median(x[index])
+    x += conversion*rows[0] - np.median(cols)
     x *= conversion
 
     # Calculate error in profile (ydatea)
@@ -185,7 +185,7 @@ def extract_data(filename, conversion, rows = [], cols = [],sigmaRaw = 0.0315, n
     y_error = alpha_0 + alpha_1
 
     # subtract minimum baseline light from profile
-    profile -= profileMin
+    #profile -= profileMin
 
     if norm == 'abs': # in 8 bit
         norm_profile = profile/GreyValMax
