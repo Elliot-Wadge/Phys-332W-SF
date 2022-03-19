@@ -197,3 +197,63 @@ def extract_data(filename, conversion, rows = [], cols = [],sigmaRaw = 0.0315, n
 
     return Extracted_Data(raw = raw, profile = profile, norm_profile = norm_profile, x = x, rows = rowsAveraged, err = y_error)
 
+
+@np.vectorize
+def duty_cycle_fourier(x,a,d,I=1,N=9, modifier = {}):
+    F0 = d*I
+    k = 2*np.pi/a
+    
+    n = np.arange(-N,N+1,1)
+    #remove the zero
+    n = np.delete(n,len(n)//2)
+    mod = np.ones(len(n))
+    
+
+    for key in modifier.keys():
+        i = np.where(n == int(key))
+        
+        n[i] = modifier[key]
+        if key == '0':
+            F0 = modifier[key]
+        
+
+    fourier_series = F0 - 1j/(2*np.pi)*np.sum(1/n*(1-np.exp(-1j*2*np.pi*n*d))*np.exp(1j*n*k*x))
+    return fourier_series
+
+def intensity_duty(x,a,d,I=1,N=9,modifier = {}):
+    y = duty_cycle_fourier(x,a,d, I = I, N = N, modifier = modifier)
+    return y*np.conj(y)
+
+@np.vectorize
+def fourier_series(x,a,I=1,N=9,modifier = {}):
+    F0 = 1/2*I
+    k = 2*np.pi/a
+    
+    if N%2 == 0:
+        N += 1
+        
+    
+    n = np.arange(-N,N+2,2)
+    mod = np.ones(len(n))
+    
+
+    power = np.where((abs(n)+1)%4 == 0, [1],[0])
+    #this gets the sign right
+    sign = (-1)**power
+    coef = sign/(abs(n)*np.pi)
+
+    for key in modifier.keys():
+        i = np.where(n == int(key))
+        
+        coef[i] = modifier[key]
+        if key == '0':
+            F0 = modifier[key]
+        
+    fourier_series = F0 + np.sum(coef*np.exp(-1j*n*k*x))
+    return fourier_series
+
+
+
+def intensity_duty(x,a,d,I=1,N=9,modifier = {}):
+    y = duty_cycle_fourier(x,a,d, I = I, N = N, modifier = modifier)
+    return y*np.conj(y)
